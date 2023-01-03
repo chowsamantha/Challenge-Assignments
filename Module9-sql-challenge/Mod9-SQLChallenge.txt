@@ -1,0 +1,113 @@
+-- create tables to import data
+CREATE TABLE departments (
+	dept_no VARCHAR(4) NOT NULL PRIMARY KEY,
+	dept_name VARCHAR
+);
+
+CREATE TABLE dept_emp (
+	emp_no INT NOT NULL PRIMARY KEY,
+	dept_no VARCHAR(4)
+);
+CREATE TABLE dept_manager (
+	dept_no VARCHAR(4),
+	emp_no INT
+);
+CREATE TABLE employees (
+	emp_no INT NOT NULL PRIMARY KEY,
+	emp_title VARCHAR,
+	birth_date DATE,
+	first_name VARCHAR,
+	last_name VARCHAR,
+	sex VARCHAR,
+	hire_date DATE
+);
+CREATE TABLE salaries (
+	emp_no INT NOT NULL PRIMARY KEY,
+	salary FLOAT
+);
+CREATE TABLE titles (
+	title_id VARCHAR PRIMARY KEY,
+	title VARCHAR
+);
+
+--Data Analysis #1
+SELECT emp_no,
+	first_name,
+	last_name,
+	sex,
+	(SELECT salary
+	FROM salaries
+	WHERE employees.emp_no = salaries.emp_no)
+FROM employees
+
+--Data Analysis #2
+SELECT first_name,
+	last_name,
+	hire_date
+FROM employees
+WHERE hire_date >= '1986-01-01'
+
+--Data Analysis #3
+SELECT dept_manager.emp_no, 
+	first_name, 
+	last_name,
+	dept_no,
+	(SELECT dept_name
+		FROM departments
+		WHERE dept_manager.dept_no = departments.dept_no)
+FROM dept_manager
+LEFT JOIN employees
+	ON dept_manager.emp_no = employees.emp_no
+	
+--Data Analysis #4
+with Depts as (
+	SELECT emp_no, dept_emp.dept_no, dept_name 
+	FROM dept_emp
+	LEFT JOIN departments ON dept_emp.dept_no = departments.dept_no)
+SELECT employees.emp_no,
+	first_name,
+	last_name,
+	dept_no,
+	dept_name
+FROM employees
+LEFT JOIN Depts ON employees.emp_no = Depts.emp_no
+
+--Data Analysis #5
+SELECT first_name,
+	last_name,
+	sex
+FROM employees
+WHERE first_name = 'Hercules'
+	AND last_name LIKE 'B%'
+	
+--Data Analysis #6
+with Depts as (
+	SELECT emp_no, dept_emp.dept_no, dept_name 
+	FROM dept_emp
+	LEFT JOIN departments ON dept_emp.dept_no = departments.dept_no)
+SELECT employees.emp_no,
+	first_name,
+	last_name,
+	dept_name
+FROM employees
+LEFT JOIN Depts ON employees.emp_no = Depts.emp_no
+WHERE dept_name = 'Sales'
+
+--Data Analysis #7
+with Depts as (
+	SELECT emp_no, dept_emp.dept_no, dept_name 
+	FROM dept_emp
+	LEFT JOIN departments ON dept_emp.dept_no = departments.dept_no)
+SELECT employees.emp_no,
+	first_name,
+	last_name,
+	dept_name
+FROM employees
+LEFT JOIN Depts ON employees.emp_no = Depts.emp_no
+WHERE dept_name IN ('Sales','Development')
+
+--Data Analysis #8
+SELECT last_name,
+	count(emp_no) as frequency_count
+FROM employees
+GROUP BY last_name
